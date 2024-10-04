@@ -1,8 +1,12 @@
 import express from 'express'
+// import { config } from 'dotenv';
+import 'dotenv/config'
+import logger from './utils/logger.js'
+import morgan from 'morgan'
 
 const app = express()
 
-const port = 3000;
+const port = process.env.PORT
 
 // app.get('/',(req,res)=>{
 //     res.send('Hey I am rahul student of  hitesh chaudhary aka chai or code ')
@@ -10,12 +14,27 @@ const port = 3000;
 
 
 app.use(express.json())
-
+const morganFormat = ":method :url :status :response-time ms";
+app.use(
+    morgan(morganFormat, {
+      stream: {
+        write: (message) => {
+          const logObject = {
+            method: message.split(" ")[0],
+            url: message.split(" ")[1],
+            status: message.split(" ")[2],
+            responseTime: message.split(" ")[3],
+          };
+          logger.info(JSON.stringify(logObject));
+        },
+      },
+    })
+  );
 const OrderData = [];
 let nextId = 1;
 
 app.post('/Order', (req, res) => {
-
+   logger.info('Created Sucessfully')
     const { Product, Price } = req.body;
 
     OrderData.push({ id: nextId++, Product, Price })
